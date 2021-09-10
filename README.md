@@ -9,8 +9,22 @@
 <br/>
 
 * F2M_model_V19 테스트 샘플 (아직 실험중)
-!(f3)[https://github.com/Kimyuhwanpeter/F2M_model_V19_20/blob/main/%EA%B7%B8%EB%A6%BC3.png]
+![f3](https://github.com/Kimyuhwanpeter/F2M_model_V19_20/blob/main/%EA%B7%B8%EB%A6%BC3.png)
 <br/>
 
-* F2M_model_V19 테스트 샘플 분석 (제안방법이 나이 주름 정보에 강인해 보임)
-!()
+![f4](https://github.com/Kimyuhwanpeter/F2M_model_V19_20/blob/main/%EA%B7%B8%EB%A6%BC5.png)
+<br/>
+
+* F2M_model_V19 테스트 샘플 분석 (제안방법이 나이 주름 정보에 강인해 보임. 노이즈에 강인해보임)
+![f5](https://github.com/Kimyuhwanpeter/F2M_model_V19_20/blob/main/%EA%B7%B8%EB%A6%BC4.png)
+<br/>
+
+![f6](https://github.com/Kimyuhwanpeter/F2M_model_V19_20/blob/main/%EA%B7%B8%EB%A6%BC6.png)
+<br/>
+
+## F2M_model_V19_2 (V20)
+![f7](https://github.com/Kimyuhwanpeter/F2M_model_V19_20/blob/main/%EA%B7%B8%EB%A6%BC7.png)
+<br/>
+
+* 학습 샘플 (아직 실험중)
+![f8](https://github.com/Kimyuhwanpeter/F2M_model_V19_20/blob/main/%EA%B7%B8%EB%A6%BC8.png)
