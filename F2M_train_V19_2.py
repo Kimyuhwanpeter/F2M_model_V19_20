@@ -144,6 +144,47 @@ def increase_func(x):
     x = tf.cast(tf.maximum(1, x), tf.float32)
     return tf.math.log(x)
 
+def match_age_images(a_images, a_labels, b_images, b_labels):
+
+    #a = np.array([1,2,3,4,5])
+    #for i in range(len(a)):
+    #    i = 0
+    #    a = np.delete(a, i)
+    #    print(a)
+    #    if len(a) == 1:
+    #        break
+
+    a_images, a_labels, b_images, b_labels = np.array(a_images), np.array(a_labels), np.array(b_images), np.array(b_labels)
+
+    A_images_buffer = []
+    A_labels_buffer = []
+    B_images_buffer = []
+    B_labels_buffer = []
+    
+    for i in range(len(a_images)):
+        i = 0
+        for j in range(len(b_images)):
+            if np.less_equal(tf.abs(a_labels[i] - b_labels[j]), 3):
+                A_images_buffer.append(a_images[i])
+                A_labels_buffer.append(a_labels[i])
+                a_images = np.delete(a_images, i)
+                a_labels = np.delete(a_labels, i)
+
+                B_images_buffer.append(b_images[j])
+                B_labels_buffer.append(b_labels[j])
+                b_images = np.delete(b_images, j)
+                b_labels = np.delete(b_labels, j)
+                break
+
+
+    A_images_buffer = np.array(A_images_buffer)
+    A_labels_buffer = np.array(A_labels_buffer)
+    B_images_buffer = np.array(B_images_buffer)
+    B_labels_buffer = np.array(B_labels_buffer)
+    print(len(A_images_buffer), len(A_labels_buffer), len(B_images_buffer), len(B_labels_buffer))
+
+    return A_images_buffer, A_labels_buffer, B_images_buffer, B_labels_buffer
+  
 def cal_loss(A2B_model, B2A_model, DA_model, DB_model, DA_age_model, DB_age_model,
              A_batch_images, B_batch_images, B_batch_labels, A_batch_labels,
              A_ref, B_ref, A_N_buf, B_N_buf):
@@ -321,6 +362,8 @@ def main():
             a_labels = a_labels[:min_]
             b_images = b_images[:min_]
             b_labels = b_labels[:min_]
+            
+            a_images, a_labels, b_images, b_labels = match_age_images(a_images, a_labels, b_images, b_labels)
 
             A_zip = np.array(list(zip(a_images, a_labels)))
             B_zip = np.array(list(zip(b_images, b_labels)))
