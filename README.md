@@ -5,7 +5,7 @@
 ## F2M_model_V19
 ![f1](https://github.com/Kimyuhwanpeter/F2M_model_V19_20/blob/main/%EA%B7%B8%EB%A6%BC1.png)
 
-![f2](https://github.com/Kimyuhwanpeter/F2M_model_V19_20/blob/main/%EA%B7%B8%EB%A6%BC2.png)
+![f2](https://github.com/Kimyuhwanpeter/F2M_model_V19_20/blob/main/FI2.png)
 <br/>
 
 * F2M_model_V19 테스트 샘플 (아직 실험중)
