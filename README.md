@@ -26,5 +26,7 @@
 ![f7](https://github.com/Kimyuhwanpeter/F2M_model_V19_20/blob/main/%EA%B7%B8%EB%A6%BC7.png)
 <br/>
 
-* 학습 샘플 (아직 실험중)
+* 학습 샘플 (실험 결과 영상은 좋으나, 나이 성능이 좋지 못함)
 ![f8](https://github.com/Kimyuhwanpeter/F2M_model_V19_20/blob/main/%EA%B7%B8%EB%A6%BC8.png)
+
+* Adaptive training을 시도해 볼 예정
