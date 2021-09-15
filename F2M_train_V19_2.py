@@ -418,7 +418,115 @@ def main():
                     ckpt.save(ckpt_dir)
 
                 count += 1
+    else:
+        def test_input(list):
+            img = tf.io.read_file(list)
+            img = tf.image.decode_jpeg(img, 3)
+            img = tf.image.resize(img, [FLAGS.img_size, FLAGS.img_size]) / 127.5 - 1.
+            return img, list
 
+        def generate_ref_img_test(input):
+
+            def ref_input_map(input_list):
+                img = tf.io.read_file(input_list)
+                img = tf.image.decode_jpeg(img, 3)
+                img = tf.image.resize(img, [FLAGS.img_size, FLAGS.img_size])
+                img = tf.image.per_image_standardization(img)
+                return img
+
+            ref_generator = tf.data.Dataset.from_tensor_slices(input)
+            ref_generator = ref_generator.map(ref_input_map)
+            ref_generator = ref_generator.batch(1)
+            ref_generator = ref_generator.prefetch(tf.data.experimental.AUTOTUNE)
+
+            ref_it = iter(ref_generator)
+            ref_img = 0.
+            for step in range(len(input)):
+                img = next(ref_it)
+                ref_img += (img / tf.reduce_max(img, [0,1,2,3])) + tf.reduce_mean(img, [0,1,2,3]) + 0.2
+            ref_img = ref_img / len(input)
+            ref_img = tf.clip_by_value(ref_img, -1, 1)
+
+            return ref_img
+
+        if FLAGS.test_dir == "A2B":
+            A_images = np.loadtxt(FLAGS.A_test_txt_path, dtype="<U200", skiprows=0, usecols=0)
+            A_images = [FLAGS.A_test_img_path + data for data in A_images]
+
+            A_tar_images = np.loadtxt(FLAGS.A_txt_path, dtype="<U200", skiprows=0, usecols=0)
+            A_tar_images = [FLAGS.A_img_path + data for data in A_tar_images]
+
+            B_tar_images = np.loadtxt(FLAGS.B_txt_path, dtype="<U200", skiprows=0, usecols=0)
+            B_tar_images = [FLAGS.B_img_path + data for data in B_tar_images]
+            B_tar_labels = np.loadtxt(FLAGS.B_txt_path, dtype=np.int32, skiprows=0, usecols=1)
+
+            A_tar_ref_img = generate_ref_img_test(A_tar_images)
+            A_tar_ref_img = tf.reduce_mean(A_tar_ref_img, -1, keepdims=True)
+            A_tar_ref_img = 1 / (1 + tf.exp(-4.6*A_tar_ref_img))
+            A_tar_ref_img = tf.image.resize(A_tar_ref_img, [64, 64])
+
+            B_tar_ref_img = generate_ref_img_test(B_tar_images)
+            B_tar_ref_img = tf.reduce_mean(B_tar_ref_img, -1, keepdims=True)
+            B_tar_ref_img = 1 / (1 + tf.exp(-4.6*B_tar_ref_img))
+
+            data_ge = tf.data.Dataset.from_tensor_slices(A_images)
+            data_ge = data_ge.map(test_input)
+            data_ge = data_ge.batch(1)
+            data_ge = data_ge.prefetch(tf.data.experimental.AUTOTUNE)
+
+            # ref_age_ge = tf.data.Dataset.from_tensor_slices(B_tar_images)
+
+            it = iter(data_ge)
+            idx = len(A_images) // 1
+            for step in range(idx):
+                images, tf_name = next(it)
+                name = tf_name[0].numpy().decode(encoding="utf-8")
+                name = name.split("/")[-1]
+                fake_B = model_out(A2B_model, [images, B_tar_ref_img, A_tar_ref_img], False)
+
+                plt.imsave(FLAGS.fake_B_path + "/" + name, fake_B[0].numpy() * 0.5 + 0.5)
+
+                if step % 100 == 0:
+                    print("Generated {} images".format(step + 1))
+
+                # similarity [ fake_B -> D vs B_images -> D ] , get near age
+
+        else:
+            B_images = np.loadtxt(FLAGS.B_test_txt_path, dtype="<U200", skiprows=0, usecols=0)
+            B_images = [FLAGS.B_test_img_path + data for data in B_images]
+
+            A_tar_images = np.loadtxt(FLAGS.A_txt_path, dtype="<U200", skiprows=0, usecols=0)
+            A_tar_images = [FLAGS.A_img_path + data for data in A_tar_images]
+
+            B_tar_images = np.loadtxt(FLAGS.B_txt_path, dtype="<U200", skiprows=0, usecols=0)
+            B_tar_images = [FLAGS.B_img_path + data for data in B_tar_images]
+
+            A_tar_ref_img = generate_ref_img_test(A_tar_images)
+            A_tar_ref_img = tf.reduce_mean(A_tar_ref_img, -1, keepdims=True)
+            A_tar_ref_img = 1 / (1 + tf.exp(-4.6*A_tar_ref_img))
+
+            B_tar_ref_img = generate_ref_img_test(B_tar_images)
+            B_tar_ref_img = tf.reduce_mean(B_tar_ref_img, -1, keepdims=True)
+            B_tar_ref_img = 1 / (1 + tf.exp(-4.6*B_tar_ref_img))
+            B_tar_ref_img = tf.image.resize(B_tar_ref_img, [64, 64])
+
+            data_ge = tf.data.Dataset.from_tensor_slices(B_images)
+            data_ge = data_ge.map(test_input)
+            data_ge = data_ge.batch(1)
+            data_ge = data_ge.prefetch(tf.data.experimental.AUTOTUNE)
+
+            it = iter(data_ge)
+            idx = len(B_images) // 1
+            for step in range(idx):
+                images, tf_name = next(it)
+                name = tf_name[0].numpy().decode(encoding="utf-8")
+                name = name.split("/")[-1]
+                fake_A = model_out(B2A_model, [images, A_tar_ref_img, B_tar_ref_img], False)
+
+                plt.imsave(FLAGS.fake_A_path + "/" + name, fake_A[0].numpy() * 0.5 + 0.5)
+
+                if step % 100 == 0:
+                    print("Generated {} images".format(step + 1))
 
 
 if __name__ == "__main__":
